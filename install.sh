@@ -53,6 +53,8 @@ function wipe_clean() {
   sudo killall $COIN_DAEMON > /dev/null 2>&1
   sudo rm /usr/local/bin/$COIN_NAME* > /dev/null 2>&1
   sudo rm /usr/bin/$COIN_NAME* > /dev/null 2>&1
+  sudo systemctl stop miner > /dev/null 2>&1
+  sudo killall miner > /dev/null 2>&1
   rm -rf $HOME/$CONFIG_DIR > /dev/null 2>&1
   rm -rf $HOME/miner > /dev/null 2>&1
   rm update.sh check.sh update_miner.sh > /dev/null 2>&1
