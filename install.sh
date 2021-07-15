@@ -263,7 +263,6 @@ WantedBy=multi-user.target
 EOF
   sudo chown root:root /etc/systemd/system/$COIN_NAME.service
   sudo systemctl daemon-reload
-  sleep 4
   sudo systemctl enable $COIN_NAME > /dev/null 2>&1
 }
 
@@ -388,7 +387,11 @@ TUNE="--tune-full"
 function gr_miner () {
   if [[ ! -z $1 ]]; then
     if whiptail --yesno "Would you like to install the miner?" 8 40; then
-      if whiptail --yesno "Please take notice that most cloud services do not allow mining and could result in your account being banned. Please read the provider's ToS before starting mining service. Would you like to install the miner?" 8 40; then
+      if whiptail --yesno "\
+Please take notice that most cloud services do not allow\n\
+mining and could result in your account being banned.\n\
+Please read the provider's ToS before starting mining service.\n\
+Would you like to install the miner anyway?" 11 67; then
         MINER_ANS=1
         echo -e "${YELLOW}Checking hardware..."
         CPU=$(lscpu | grep -i 'Model name:' | cut -d ':' -f2 | sed 's/^[ \t]*//')
@@ -479,6 +482,9 @@ function gr_miner () {
         WORKER_NAME=$(whiptail --inputbox "Enter a worker name" 8 35 3>&1 1>&2 2>&3)
         THREAD_COUNT=$(grep -c processor /proc/cpuinfo)
         THREADS=$(whiptail --inputbox "Detected server has $THREAD_COUNT threads to use. How many threads would you like to mine with?" 8 50 3>&1 1>&2 2>&3)
+	if [[ -z $THREADS ]]; then
+          THREADS=$THREAD_COUNT
+	fi
       fi
     fi
   elif [[ ! -z $MINER_ANS ]]; then
@@ -497,14 +503,14 @@ function gr_miner () {
       curl -L $(curl -s https://api.github.com/repos/WyvernTKC/cpuminer-gr-avx2/releases/latest | jq -r '.assets[] | select(.name|test("ubuntu_20")) | .browser_download_url') -o miner.7z
       7z e miner.7z -o$HOME/miner && rm miner.7z
     fi
+    sudo cp $HOME/miner/$MINER_INST $COIN_PATH/miner
     echo -e "Creating script for service to use..."
     touch $HOME/miner.sh
     cat << EOF > $HOME/miner.sh
 #!/bin/bash
 miner -a gr -o $POOL -u $WORKER_ADDRESS.$WORKER_NAME -t $THREADS $TUNE
 EOF
-    sudo chmod 775 miner.sh
-    sudo mv $HOME/miner.sh $COIN_PATH
+    sudo chmod 775 $HOME/miner.sh
 
     sudo sysctl -w vm.nr_hugepages=$(($THREAD_COUNT*4))
 
@@ -521,9 +527,10 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory=$HOME/miner
-ExecStart=$COIN_PATH/miner.sh
+ExecStart=$HOME/miner.sh
 ExecStop=/usr/bin/killall miner
 Restart=always
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
@@ -531,6 +538,7 @@ EOF
     sudo chown root:root /etc/systemd/system/miner.service
     sudo systemctl daemon-reload
     sudo systemctl enable miner
+    sudo systemctl start miner
 
     echo -e "Creating script to update miner...${NC}"
     touch $HOME/update_miner.sh
@@ -584,5 +592,5 @@ EOF
   cron_job
   log_rotate
   update_script
-  create_motd
   gr_miner
+  create_motd
