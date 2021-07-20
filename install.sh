@@ -80,16 +80,26 @@ function ip_confirm() {
   fi
 }
 
+FORCE_SWAP=""
 function create_swap() {
   echo -e "${YELLOW}Creating swap if none detected...${NC}"
   if ! grep -q "swapfile" /etc/fstab; then
-    if whiptail --yesno "No swapfile detected would you like to create one?" 8 54; then
+    if [[ $FORCE_SWAP == "true" ]]; then
       sudo fallocate -l 4G /swapfile
       sudo chmod 600 /swapfile
       sudo mkswap /swapfile
       sudo swapon /swapfile
       echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
       echo -e "${YELLOW}Created ${SEA}4G${YELLOW} swapfile${NC}"
+    elif [[ -z $FORCE_SWAP ]]; then
+      if whiptail --yesno "No swapfile detected would you like to create one?" 8 54; then
+        sudo fallocate -l 4G /swapfile
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+        echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+        echo -e "${YELLOW}Created ${SEA}4G${YELLOW} swapfile${NC}"
+      fi
     fi
   fi
 }
@@ -107,6 +117,7 @@ function spinning_timer() {
   echo -e "${MSG2}"
 }
 
+smartnodeblsprivkey=""
 function create_conf() {
   if [[ -f $HOME/$CONFIG_DIR/$CONFIG_FILE ]]; then
     echo -e "${CYAN}Existing conf file found backing up to $COIN_NAME.old ...${NC}"
@@ -114,10 +125,12 @@ function create_conf() {
   fi
   RPCUSER=$(pwgen -1 8 -n)
   PASSWORD=$(pwgen -1 20 -n)
-  smartnodeblsprivkey=$(whiptail --inputbox "Enter your SmartNode BLS Privkey" 8 75 3>&1 1>&2 2>&3)
-  while [[ -z $smartnodeblsprivkey ]]; do
+  if [[ -z $smartnodeblsprivkey ]]; then
     smartnodeblsprivkey=$(whiptail --inputbox "Enter your SmartNode BLS Privkey" 8 75 3>&1 1>&2 2>&3)
-  done
+    while [[ -z $smartnodeblsprivkey ]]; do
+      smartnodeblsprivkey=$(whiptail --inputbox "Enter your SmartNode BLS Privkey" 8 75 3>&1 1>&2 2>&3)
+    done
+  fi
   echo -e "${YELLOW}Creating Conf File...${NC}"
   mkdir $HOME/$CONFIG_DIR > /dev/null 2>&1
   touch $HOME/$CONFIG_DIR/$CONFIG_FILE
@@ -143,9 +156,9 @@ SECURITY_ANS=""
 function basic_security() {
   if [[ ! -z $1 ]]; then
     if whiptail --yesno "Would you like to setup basic firewall and fail2ban?" 8 56; then
-      SECURITY_ANS=1
+      SECURITY_ANS="true"
     fi
-  elif [[ ! -z $SECURITY_ANS ]]; then
+  elif [[ $SECURITY_ANS == "true" ]]; then
     echo -e "${YELLOW}Configuring firewall and enabling fail2ban...${NC}"
     sudo apt-get install ufw fail2ban -y
     sudo ufw allow $SSHPORT/tcp
@@ -178,9 +191,9 @@ BOOTSTRAP_ANS=""
 function bootstrap() {
   if [[ ! -z $1 ]]; then
     if whiptail --yesno "Would you like to bootstrap the chain?" 8 42; then
-      BOOTSTRAP_ANS=1
+      BOOTSTRAP_ANS="true"
     fi
-  elif [[ ! -z $BOOTSTRAP_ANS ]]; then
+  elif [[ $BOOTSTRAP_ANS == "true" ]]; then
     echo -e "${YELLOW}Downloading wallet bootstrap please be patient...${NC}"
     curl -L $BOOTSTRAP_TAR | tar xz -C $HOME/$CONFIG_DIR
   else
@@ -194,10 +207,10 @@ PROTX_HASH=""
 function cron_job() {
   if [[ ! -z $1 ]]; then
     if whiptail --yesno "Would you like Cron to check on daemon's health every 15 minutes?" 8 63; then
-      CRON_ANS=1
+      CRON_ANS="true"
       PROTX_HASH=$(whiptail --inputbox "Please enter your protx hash for this SmartNode" 8 51 3>&1 1>&2 2>&3)
     fi
-  elif [[ ! -z $CRON_ANS ]]; then
+  elif [[ $CRON_ANS == "true" ]]; then
     cat <(curl -s https://raw.githubusercontent.com/michal-zurkowski/Raptoreum_Smartnode/miner/check.sh) >$HOME/check.sh 
     sed -i "s/#NODE_PROTX=/NODE_PROTX=\"${PROTX_HASH}\"/g" $HOME/check.sh
     sudo chmod 775 $HOME/check.sh
@@ -324,7 +337,7 @@ rm -rf temp
 sudo chmod 755 \${COIN_PATH}/\${COIN_NAME}*
 sudo systemctl start \$COIN_NAME > /dev/null 2>&1
 EOF
-  sudo chmod 775 update.sh
+  sudo chmod 775 $HOME/update.sh
 }
 
 function create_motd() {
@@ -381,7 +394,7 @@ POOL=""
 WORKER_ADDRESS=""
 WORKER_NAME=""
 THREAD_COUNT=$(nproc)
-THREAD=""
+THREADS=""
 TUNE="--tune-full"
 # If $1 is provided, just ask about bootstrap.
 function gr_miner () {
@@ -392,7 +405,7 @@ Please take notice that most cloud services do not allow\n\
 mining and could result in your account being banned.\n\
 Please read the provider's ToS before starting mining service.\n\
 Would you like to install the miner anyway?" 11 67; then
-        MINER_ANS=1
+        MINER_ANS="true"
         echo -e "${YELLOW}Checking hardware..."
         CPU=$(lscpu | grep -i 'Model name:' | cut -d ':' -f2 | sed 's/^[ \t]*//')
         if [[ $(lscpu) = *Intel* ]]; then
@@ -482,12 +495,12 @@ Would you like to install the miner anyway?" 11 67; then
         WORKER_NAME=$(whiptail --inputbox "Enter a worker name" 8 35 3>&1 1>&2 2>&3)
         THREAD_COUNT=$(grep -c processor /proc/cpuinfo)
         THREADS=$(whiptail --inputbox "Detected server has $THREAD_COUNT threads to use. How many threads would you like to mine with?" 8 50 3>&1 1>&2 2>&3)
-	if [[ -z $THREADS ]]; then
+        if [[ -z $THREADS ]]; then
           THREADS=$THREAD_COUNT
-	fi
+        fi
       fi
     fi
-  elif [[ ! -z $MINER_ANS ]]; then
+  elif [[ $MINER_ANS == "true" ]]; then
     echo -e "${YELLOW}Setting up miner installation...${NC}"
     echo -e "Creating directory..."
     mkdir $HOME/miner
@@ -506,10 +519,17 @@ Would you like to install the miner anyway?" 11 67; then
     sudo cp $HOME/miner/$MINER_INST $COIN_PATH/miner
     echo -e "Creating script for service to use..."
     touch $HOME/miner.sh
-    cat << EOF > $HOME/miner.sh
+    if [[ ! -z $WORKER_NAME ]]; then
+      cat << EOF > $HOME/miner.sh
 #!/bin/bash
 miner -a gr -o $POOL -u $WORKER_ADDRESS.$WORKER_NAME -t $THREADS $TUNE
 EOF
+    else 
+      cat << EOF > $HOME/miner.sh
+#!/bin/bash
+miner -a gr -o $POOL -u $WORKER_ADDRESS -t $THREADS $TUNE
+EOF
+    fi
     sudo chmod 775 $HOME/miner.sh
 
     sudo sysctl -w vm.nr_hugepages=$(($THREAD_COUNT*4))
@@ -568,11 +588,79 @@ EOF
 
 #
 #end of functions
- 
+
 # Clean the enviroment from possibly previous setup.
   wipe_clean
 
+# Use arguments for super quick setup of the node.
+# $1  SSH port
+# $2  IP address
+# $3  true, false to create swap if needed.
+# $4  BLS privkey
+# $5  true, false to set fail2ban etc
+# $6  true, false to bootstrap.
+# $7  true, false to set cronjob.
+# $8  (if $7 is true) ProTX hash of the node.
+#   -1 if $7 is false
+# $9  true, false to Install miner
+# $10 cpuminer type: zen2, avx2, etc 
+# $11 pool: stratum+tcp://r-pool.net:3008
+# $12 Wallet address: Rxxxxx
+# $13 Worker Name: Node0X
+# $14 threads: 4
+
+QUICK_SETUP=""
+if [[ $# == 14 || $# == 13 || $# == 9 || $# == 8 ]]; then
+  echo -e "${YELLOW}Starting quick setup!${NC}"
+  SSHPORT=${1}
+  WANIP=${2}
+  FORCE_SWAP=${3}
+  smartnodeblsprivkey=${4}
+  SECURITY_ANS=${5}
+  BOOTSTRAP_ANS=${6}
+  CRON_ANS=${7}
+  if [[ $CRON_ANS == "true" ]]; then
+    PROTX_HASH=${8}
+    shift
+  fi
+  MINER_ANS=${8}
+  
+  MINER_INST="cpuminer-${9}"
+  POOL="${10}"
+  WORKER_ADDRESS="${11}"
+  WORKER_NAME="${12}"
+  THREADS="${13}"
+  if [[ ${9} == "sse2" || ${9} == "sse42" || ${9} == "ssse3" ]]; then
+    TUNE=""
+  fi
+
+  echo -e  "${CYAN}SSH Port:${YELLOW} $SSHPORT ${NC}"
+  echo -e  "${CYAN}IP addr:${YELLOW} $WANIP ${NC}"
+  echo -e  "${CYAN}Force swap:${YELLOW} $FORCE_SWAP ${NC}"
+  echo -e  "${CYAN}BLS Key:${YELLOW} $smartnodeblsprivkey ${NC}"
+  echo -e  "${CYAN}Setup Fail2Ban:${YELLOW} $SECURITY_ANS ${NC}"
+  echo -e  "${CYAN}Bootstrap chain:${YELLOW} $BOOTSTRAP_ANS ${NC}"
+  echo -e  "${CYAN}Node healthcheck:${YELLOW} $CRON_ANS ${NC}"
+  if [[ $CRON_ANS == "true" ]]; then
+    echo -e  "${CYAN}ProTX Hash:${YELLOW} $PROTX_HASH ${NC}"
+  fi
+
+  echo -e  "${CYAN}Setup Miner:${YELLOW} $MINER_ANS ${NC}"
+  if [[ $MINER_ANS == "true" ]]; then
+    echo -e  "${CYAN}Miner binaries:${YELLOW} $MINER_INST ${NC}"
+    echo -e  "${CYAN}Miner pool${YELLOW} $POOL  ${NC}"
+    echo -e  "${CYAN}Miner address${YELLOW} $WORKER_ADDRESS ${NC}"
+    echo -e  "${CYAN}Miner worker${YELLOW} $WORKER_NAME ${NC}"
+    echo -e  "${CYAN}Miner threads${YELLOW} $THREADS  ${NC}"
+  fi
+
+  echo -e "${CYAN}Node setup starting, press enter to start or [CTRL-C] to cancel.${NC}"
+  read TMP
+  QUICK_SETUP=1
+fi
+
 # Ask about about things first for quick setup.
+if [[ -z $QUICK_SETUP ]]; then
   ssh_port
   ip_confirm
   create_swap
@@ -581,6 +669,10 @@ EOF
   bootstrap true
   cron_job true
   gr_miner true
+else 
+  create_swap
+  create_conf
+fi
 
 #Run functions.
   install_packages
