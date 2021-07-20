@@ -119,18 +119,21 @@ function spinning_timer() {
 
 smartnodeblsprivkey=""
 function create_conf() {
+  if [[ ! -z $1 ]]; then
+    while [[ -z $smartnodeblsprivkey ]]; do
+      smartnodeblsprivkey=$(whiptail --inputbox "Enter your SmartNode BLS Privkey" 8 75 3>&1 1>&2 2>&3)
+    done
+    return
+  fi
   if [[ -f $HOME/$CONFIG_DIR/$CONFIG_FILE ]]; then
     echo -e "${CYAN}Existing conf file found backing up to $COIN_NAME.old ...${NC}"
     mv $HOME/$CONFIG_DIR/$CONFIG_FILE $HOME/$CONFIG_DIR/$COIN_NAME.old;
   fi
   RPCUSER=$(pwgen -1 8 -n)
   PASSWORD=$(pwgen -1 20 -n)
-  if [[ -z $smartnodeblsprivkey ]]; then
+  while [[ -z $smartnodeblsprivkey ]]; do
     smartnodeblsprivkey=$(whiptail --inputbox "Enter your SmartNode BLS Privkey" 8 75 3>&1 1>&2 2>&3)
-    while [[ -z $smartnodeblsprivkey ]]; do
-      smartnodeblsprivkey=$(whiptail --inputbox "Enter your SmartNode BLS Privkey" 8 75 3>&1 1>&2 2>&3)
-    done
-  fi
+  done
   echo -e "${YELLOW}Creating Conf File...${NC}"
   mkdir $HOME/$CONFIG_DIR > /dev/null 2>&1
   touch $HOME/$CONFIG_DIR/$CONFIG_FILE
@@ -664,19 +667,19 @@ if [[ -z $QUICK_SETUP ]]; then
   ssh_port
   ip_confirm
   create_swap
-  create_conf
+  create_conf true
   basic_security true
   bootstrap true
   cron_job true
   gr_miner true
 else 
   create_swap
-  create_conf
 fi
 
 #Run functions.
   install_packages
   install_bins
+  create_conf
   bootstrap
   create_service
   basic_security
