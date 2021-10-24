@@ -17,8 +17,8 @@ USERNAME="$(whoami)"
 #color codes
 RED='\033[1;31m'
 YELLOW='\033[1;33m'
-BLUE="\\033[38;5;27m"
-SEA="\\033[38;5;49m"
+BLUE='\033[38;5;27m'
+SEA='\033[38;5;49m'
 GREEN='\033[1;32m'
 CYAN='\033[1;36m'
 BLINKRED='\033[1;31;5m'
@@ -353,8 +353,8 @@ COIN_CLI='raptoreum-cli'
 #color codes
 RED='\033[1;31m'
 YELLOW='\033[1;33m'
-BLUE="\\033[38;5;27m"
-SEA="\\033[38;5;49m"
+BLUE='\033[38;5;27m'
+SEA='\033[38;5;49m'
 GREEN='\033[1;32m'
 CYAN='\033[1;36m'
 BLINKRED='\033[1;31;5m'
@@ -410,88 +410,101 @@ Please read the provider's ToS before starting mining service.\n\
 Would you like to install the miner anyway?" 11 67; then
         MINER_ANS="true"
         echo -e "${YELLOW}Checking hardware..."
-        CPU=$(lscpu | grep -i 'Model name:' | cut -d ':' -f2 | sed 's/^[ \t]*//')
-        if [[ $(lscpu) = *Intel* ]]; then
-          if whiptail --yesno "Detected $CPU. Would you like to use avx2?" 8 50; then
-            MINER_INST="cpuminer-avx2"
-          else
-            MINER_CHOICE=$(whiptail --menu "Select miner to use" 12 24 4 \
-              "1" "avx512" \
-              "2" "sse2" \
-              "3" "sse42" \
-              "4" "ssse3" 3>&1 1>&2 2>&3)
-            case $MINER_CHOICE in
-              1)
-                echo -e "You have selected to use avx512"
-                MINER_INST="cpuminer-avx512"
-              ;;
-              2)
-                echo -e "You have selected to use sse2"
-                MINER_INST="cpuminer-sse2"
-                TUNE=""
-              ;;
-              3)
-                echo -e "You have selected to use sse42"
-                MINER_INST="cpuminer-sse42"
-                TUNE=""
-              ;;
-              4)
-                echo -e "You have selected to use ssse3"
-                MINER_INST="cpuminer-ssse3"
-                TUNE=""
-              ;;
-            esac
-          fi
-        elif [[ $(lscpu) = *AMD* ]]; then
-          if whiptail --yesno "Detected $CPU. Would you like to use zen2?" 8 50; then
-            MINER_INST="cpuminer-zen2"
-          else
-            MINER_CHOICE=$(whiptail --menu "Select miner to use" 10 24 2 \
-              "1" "zen" \
-              "2" "zen3" 3>&1 1>&2 2>&3)
-            case $MINER_CHOICE in
-              1)
-                echo -e "You have selected to use zen"
-                MINER_INST="cpuminer-zen"
-              ;;
-              2)
-                echo -e "You have selected to use zen3"
-                MINER_INST="cpuminer-zen3"
-              ;;
-            esac
-          fi
-        fi
-        POOL_CHOICE=$(whiptail --menu "Select pool to use" 14 55 6 \
-          "1" "stratum+tcp://r-pool.net:3008" \
-          "2" "stratum+tcp://r-pool.net:3032" \
-          "3" "stratum+tcp://rtm.suprnova.cc:6273" \
-          "4" "stratum+tcp://stratum.us-la1.suprnova.cc:6273" \
-          "5" "stratum+tcp://stratum.us-ny1.suprnova.cc:6273" \
-          "6" "stratum+tcp://stratum.apac-hkg1.suprnova.cc:6273" 3>&1 1>&2 2>&3)
+        
+        POOL_CHOICE=$(whiptail --menu "Select MAIN pool to use" 14 55 6 \
+          "1" "stratum+tcp://eu.flockpool.com:4444" \
+          "2" "stratum+tcp://us.flockpool.com:4444" \
+          "3" "stratum+tcp://asia.flockpool.com:4444" \
+          "4" "stratum+tcp://r-pool.net:3008" \
+          "5" "stratum+tcp://r-pool.net:3032" \
+          "6" "stratum+tcp://rtm.suprnova.cc:6273" \
+          "7" "stratum+tcp://stratum.us-la1.suprnova.cc:6273" \
+          "8" "stratum+tcp://stratum.us-ny1.suprnova.cc:6273" \
+          "9" "stratum+tcp://stratum.apac-hkg1.suprnova.cc:6273" 3>&1 1>&2 2>&3)
         case $POOL_CHOICE in
           1)
-            echo -e "Selected r-pool for miners with <1kh/s."
-            POOL="stratum+tcp://r-pool.net:3008"
+            echo -e "Selected EU Flockpool"
+            POOL="stratum+tcp:\/\/eu.flockpool.com:4444"
           ;;
           2)
-            echo -e "Selected r-pool for miners with >1kh/s."
-            POOL="stratum+tcp://r-pool.net:3032"
+            echo -e "Selected US Flockpool"
+            POOL="stratum+tcp:\/\/us.flockpool.com:4444"
           ;;
           3)
-            echo -e "Selected EU Suprnova pool."
-            POOL="stratum+tcp://rtm.suprnova.cc:6273"
+            echo -e "Selected ASIA Flockpool"
+            POOL="stratum+tcp:\/\/asia.flockpool.com:4444"
           ;;
           4)
-            echo -e "Selected West Coast US Suprnova pool."
-            POOL="stratum+tcp://stratum.us-la1.suprnova.cc:6273"
+            echo -e "Selected r-pool for miners with <1kh/s."
+            POOL="stratum+tcp:\/\/r-pool.net:3008"
           ;;
           5)
-            echo -e "Selected East Coast US Suprnova pool."
-            POOL="stratum+tcp://stratum.us-ny1.suprnova.cc:6273"
+            echo -e "Selected r-pool for miners with >1kh/s."
+            POOL="stratum+tcp:\/\/r-pool.net:3032"
           ;;
           6)
+            echo -e "Selected EU Suprnova pool."
+            POOL="stratum+tcp:\/\/rtm.suprnova.cc:6273"
+          ;;
+          7)
+            echo -e "Selected West Coast US Suprnova pool."
+            POOL="stratum+tcp:\/\/stratum.us-la1.suprnova.cc:6273"
+          ;;
+          8)
+            echo -e "Selected East Coast US Suprnova pool."
+            POOL="stratum+tcp:\/\/stratum.us-ny1.suprnova.cc:6273"
+          ;;
+          9)
             echo -e "Selected Asia Suprnova pool."
-            POOL="stratum+tcp://stratum.apac-hkg1.suprnova.cc:6273"
+            POOL="stratum+tcp:\/\/stratum.apac-hkg1.suprnova.cc:6273"
+          ;;
+        esac
+        BACKUP_POOL_CHOICE=$(whiptail --menu "Select BACKUP pool to use" 14 55 6 \
+          "1" "stratum+tcp://eu.flockpool.com:4444" \
+          "2" "stratum+tcp://us.flockpool.com:4444" \
+          "3" "stratum+tcp://asia.flockpool.com:4444" \
+          "4" "stratum+tcp://r-pool.net:3008" \
+          "5" "stratum+tcp://r-pool.net:3032" \
+          "6" "stratum+tcp://rtm.suprnova.cc:6273" \
+          "7" "stratum+tcp://stratum.us-la1.suprnova.cc:6273" \
+          "8" "stratum+tcp://stratum.us-ny1.suprnova.cc:6273" \
+          "9" "stratum+tcp://stratum.apac-hkg1.suprnova.cc:6273" 3>&1 1>&2 2>&3)
+        case $BACKUP_POOL_CHOICE in
+          1)
+            echo -e "Selected EU Flockpool"
+            BACKUP_POOL="stratum+tcp:\/\/eu.flockpool.com:4444"
+          ;;
+          2)
+            echo -e "Selected US Flockpool"
+            BACKUP_POOL="stratum+tcp:\/\/us.flockpool.com:4444"
+          ;;
+          3)
+            echo -e "Selected ASIA Flockpool"
+            BACKUP_POOL="stratum+tcp:\/\/asia.flockpool.com:4444"
+          ;;
+          4)
+            echo -e "Selected r-pool for miners with <1kh/s."
+            BACKUP_POOL="stratum+tcp:\/\/r-pool.net:3008"
+          ;;
+          5)
+            echo -e "Selected r-pool for miners with >1kh/s."
+            BACKUP_POOL="stratum+tcp:\/\/r-pool.net:3032"
+          ;;
+          6)
+            echo -e "Selected EU Suprnova pool."
+            BACKUP_POOL="stratum+tcp:\/\/rtm.suprnova.cc:6273"
+          ;;
+          7)
+            echo -e "Selected West Coast US Suprnova pool."
+            BACKUP_POOL="stratum+tcp:\/\/stratum.us-la1.suprnova.cc:6273"
+          ;;
+          8)
+            echo -e "Selected East Coast US Suprnova pool."
+            BACKUP_POOL="stratum+tcp:\/\/stratum.us-ny1.suprnova.cc:6273"
+          ;;
+          9)
+            echo -e "Selected Asia Suprnova pool."
+            BACKUP_POOL="stratum+tcp:\/\/stratum.apac-hkg1.suprnova.cc:6273"
           ;;
         esac
         WORKER_ADDRESS=$(whiptail --inputbox "Please enter RTM address you want pool to payout to" 8 55 3>&1 1>&2 2>&3)
@@ -506,36 +519,38 @@ Would you like to install the miner anyway?" 11 67; then
   elif [[ $MINER_ANS == "true" ]]; then
     echo -e "${YELLOW}Setting up miner installation...${NC}"
     echo -e "Creating directory..."
-    mkdir $HOME/miner
+    rm -f $HOME/miner.sh 2>/dev/null
     echo -e "Installing required libraries..."
     sudo apt-get install unzip jq p7zip-full libssl-dev libcurl4-openssl-dev libjansson-dev libgmp-dev libnuma-dev -y
     echo -e "Checking distro version..."
-    if [[ $(lsb_release -r) = *18.04* ]]; then
-      echo -e "Detected Ubuntu 18.04 and will fetch latest release of compiled miner for this distro...${NC}"
-      curl -L $(curl -s https://api.github.com/repos/WyvernTKC/cpuminer-gr-avx2/releases/latest | jq -r '.assets[] | select(.name|test("ubuntu_18")) | .browser_download_url') -o miner.7z
-      7z e miner.7z -o$HOME/miner && rm miner.7z
-    elif [[ $(lsb_release -r) = *20.04* ]]; then
-      echo -e "Detected Ubuntu 20.04 and will fetch latest release of compiled miner for this distro...${NC}"
-      curl -L $(curl -s https://api.github.com/repos/WyvernTKC/cpuminer-gr-avx2/releases/latest | jq -r '.assets[] | select(.name|test("ubuntu_20")) | .browser_download_url') -o miner.7z
-      7z e miner.7z -o$HOME/miner && rm miner.7z
-    fi
-    sudo cp $HOME/miner/$MINER_INST $COIN_PATH/miner
-    echo -e "Creating script for service to use..."
-    touch $HOME/miner.sh
-    if [[ ! -z $WORKER_NAME ]]; then
-      cat << EOF > $HOME/miner.sh
-#!/bin/bash
-miner -a gr -o $POOL -u $WORKER_ADDRESS.$WORKER_NAME -t $THREADS $TUNE
-EOF
-    else 
-      cat << EOF > $HOME/miner.sh
-#!/bin/bash
-miner -a gr -o $POOL -u $WORKER_ADDRESS -t $THREADS $TUNE
-EOF
-    fi
-    sudo chmod 775 $HOME/miner.sh
+    echo -e "Detected linux and will fetch latest release of compiled miner for this distro...${NC}"
+    rm -rf /tmp/miner 2>/dev/null
+    mkdir /tmp/miner 
+    rm -rf $HOME/miner 2>/dev/null
+    mkdir $HOME/miner
+    pushd /tmp/miner
+    curl -L $(curl -s https://api.github.com/repos/WyvernTKC/cpuminer-gr-avx2/releases/latest | jq -r '.assets[] | select(.name|test("linux")) | .browser_download_url') -o miner.7z
+    7z x miner.7z
+    cp -r cpuminer*/* $HOME/miner/
+    popd
+    rm -rf /tmp/miner 2>/dev/null
+    sudo chmod -R 755  $HOME/miner/binaries/
+    sudo chmod -R 755  $HOME/miner/cpuminer.sh
 
-    sudo sysctl -w vm.nr_hugepages=$(($THREAD_COUNT*4))
+    echo -e "Update miner config for service to use..."
+    if [[ ! -z $WORKER_NAME ]]; then
+      WORKER_NAME=".$WORKER_NAME"
+    fi
+
+# Update config.json with proper pool, backup pool, wallet.worker, tune-full and log.
+    sed -i "s/\"url\":.*/\"url\": \"${POOL}\",/g" $HOME/miner/config.json
+    sed -i "s/\"url-backup\":.*/\"url-backup\": \"${BACKUP_POOL}\",/g" $HOME/miner/config.json
+    sed -i "s/\"user\":.*/\"user\": \"${WORKER_ADDRESS}${WORKER_NAME}\",/g" $HOME/miner/config.json
+    sed -i "s/\"tune-full\":.*/\"tune-full\": true,/g" $HOME/miner/config.json
+    sed -i "s/\"threads\":.*/\"threads\": ${THREADS},/g" $HOME/miner/config.json
+    sed -i "s/.*can be used to create logfile.*/\"log\": \"mining.log\",/g" $HOME/miner/config.json
+
+    sudo sysctl -w vm.nr_hugepages=$(($THREADS*4))
 
     echo -e "${YELLOW}Creating service for the miner...${NC}"
     sudo touch /etc/systemd/system/miner.service
@@ -550,8 +565,8 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory=$HOME/miner
-ExecStart=$HOME/miner.sh
-ExecStop=/usr/bin/killall miner
+ExecStart=$HOME/miner/cpuminer.sh
+ExecStop=/usr/bin/pkill cpuminer
 Restart=always
 RestartSec=5s
 
@@ -567,20 +582,20 @@ EOF
     touch $HOME/update_miner.sh
     cat << EOF > $HOME/update_miner.sh
 #!/bin/bash
-MINER=$MINER_INST
 sudo systemctl stop miner
-echo "removing old miner"
-rm \$HOME/miner/*
-echo "Removing old mining bin"
-sudo rm /usr/local/bin/miner
-if [[ \$(lsb_release -r) = *18.04* ]]; then
-  curl -L \$(curl -s https://api.github.com/repos/WyvernTKC/cpuminer-gr-avx2/releases/latest | jq -r '.assets[] | select(.name|test("ubuntu_18")) | .browser_download_url') -o miner.7z
-  7z e miner.7z -o\$HOME/miner && rm miner.7z
-elif [[ \$(lsb_release -r) = *20.04* ]]; then
-  curl -L \$(curl -s https://api.github.com/repos/WyvernTKC/cpuminer-gr-avx2/releases/latest | jq -r '.assets[] | select(.name|test("ubuntu_20")) | .browser_download_url') -o miner.7z
-  7z e miner.7z -o\$HOME/miner && rm miner.7z
-fi
-sudo cp \$HOME/miner/\$MINER /usr/local/bin/miner
+echo "Removing old miner binaries"
+rm \$HOME/miner/binaries/*
+
+rm -rf /tmp/miner 2>/dev/null
+mkdir /tmp/miner 
+pushd /tmp/miner
+curl -L \$(curl -s https://api.github.com/repos/WyvernTKC/cpuminer-gr-avx2/releases/latest | jq -r '.assets[] | select(.name|test("linux")) | .browser_download_url') -o miner.7z
+7z x miner.7z
+cp -r cpuminer*/binaries/* \$HOME/miner/binaries
+cp -r cpuminer*/cpuminer.sh \$HOME/miner/
+popd
+rm -rf /tmp/miner 2>/dev/null
+
 sudo systemctl start miner
 EOF
     sudo chmod 775 $HOME/update_miner.sh
@@ -606,8 +621,8 @@ EOF
 # $8  (if $7 is true) ProTX hash of the node.
 #   -1 if $7 is false
 # $9  true, false to Install miner
-# $10 cpuminer type: zen2, avx2, etc 
-# $11 pool: stratum+tcp://r-pool.net:3008
+# $10 main pool: stratum+tcp://eu.flockpool.com:4444
+# $11 backup pool: stratum+tcp://us.flockpool.com:4444
 # $12 Wallet address: Rxxxxx
 # $13 Worker Name: Node0X
 # $14 threads: 4
@@ -628,14 +643,11 @@ if [[ $# == 14 || $# == 13 || $# == 9 || $# == 8 ]]; then
   fi
   MINER_ANS=${8}
   
-  MINER_INST="cpuminer-${9}"
-  POOL="${10}"
+  POOL="$(echo ${9} | sed 's/\/\//\\\/\\\//g')"
+  BACKUP_POOL="$(echo ${10} | sed 's/\/\//\\\/\\\//g')"
   WORKER_ADDRESS="${11}"
   WORKER_NAME="${12}"
   THREADS="${13}"
-  if [[ ${9} == "sse2" || ${9} == "sse42" || ${9} == "ssse3" ]]; then
-    TUNE=""
-  fi
 
   echo -e  "${CYAN}SSH Port:${YELLOW} $SSHPORT ${NC}"
   echo -e  "${CYAN}IP addr:${YELLOW} $WANIP ${NC}"
@@ -650,8 +662,8 @@ if [[ $# == 14 || $# == 13 || $# == 9 || $# == 8 ]]; then
 
   echo -e  "${CYAN}Setup Miner:${YELLOW} $MINER_ANS ${NC}"
   if [[ $MINER_ANS == "true" ]]; then
-    echo -e  "${CYAN}Miner binaries:${YELLOW} $MINER_INST ${NC}"
-    echo -e  "${CYAN}Miner pool${YELLOW} $POOL  ${NC}"
+    echo -e  "${CYAN}Miner main pool${YELLOW} $POOL  ${NC}"
+    echo -e  "${CYAN}Miner backup pool${YELLOW} $BACKUP_POOL  ${NC}"
     echo -e  "${CYAN}Miner address${YELLOW} $WORKER_ADDRESS ${NC}"
     echo -e  "${CYAN}Miner worker${YELLOW} $WORKER_NAME ${NC}"
     echo -e  "${CYAN}Miner threads${YELLOW} $THREADS  ${NC}"
@@ -672,7 +684,7 @@ if [[ -z $QUICK_SETUP ]]; then
   bootstrap true
   cron_job true
   gr_miner true
-else 
+else
   create_swap
 fi
 
