@@ -414,47 +414,52 @@ Would you like to install the miner anyway?" 11 67; then
         POOL_CHOICE=$(whiptail --menu "Select MAIN pool to use" 14 55 6 \
           "1" "stratum+tcp://eu.flockpool.com:4444" \
           "2" "stratum+tcp://us.flockpool.com:4444" \
-          "3" "stratum+tcp://asia.flockpool.com:4444" \
-          "4" "stratum+tcp://r-pool.net:3008" \
-          "5" "stratum+tcp://r-pool.net:3032" \
-          "6" "stratum+tcp://rtm.suprnova.cc:6273" \
-          "7" "stratum+tcp://stratum.us-la1.suprnova.cc:6273" \
-          "8" "stratum+tcp://stratum.us-ny1.suprnova.cc:6273" \
-          "9" "stratum+tcp://stratum.apac-hkg1.suprnova.cc:6273" 3>&1 1>&2 2>&3)
+          "3" "stratum+tcp://us-west.flockpool.com:4444" \
+          "4" "stratum+tcp://asia.flockpool.com:4444" \
+          "5" "stratum+tcp://r-pool.net:3008" \
+          "6" "stratum+tcp://r-pool.net:3032" \
+          "7" "stratum+tcp://rtm.suprnova.cc:6273" \
+          "8" "stratum+tcp://stratum.us-la1.suprnova.cc:6273" \
+          "9" "stratum+tcp://stratum.us-ny1.suprnova.cc:6273" \
+          "10" "stratum+tcp://stratum.apac-hkg1.suprnova.cc:6273" 3>&1 1>&2 2>&3)
         case $POOL_CHOICE in
           1)
             echo -e "Selected EU Flockpool"
             POOL="stratum+tcp:\/\/eu.flockpool.com:4444"
           ;;
           2)
-            echo -e "Selected US Flockpool"
+            echo -e "Selected US Central Flockpool"
             POOL="stratum+tcp:\/\/us.flockpool.com:4444"
           ;;
           3)
+            echo -e "Selected US West Flockpool"
+            POOL="stratum+tcp:\/\/us-west.flockpool.com:4444"
+          ;;
+          4)
             echo -e "Selected ASIA Flockpool"
             POOL="stratum+tcp:\/\/asia.flockpool.com:4444"
           ;;
-          4)
+          5)
             echo -e "Selected r-pool for miners with <1kh/s."
             POOL="stratum+tcp:\/\/r-pool.net:3008"
           ;;
-          5)
+          6)
             echo -e "Selected r-pool for miners with >1kh/s."
             POOL="stratum+tcp:\/\/r-pool.net:3032"
           ;;
-          6)
+          7)
             echo -e "Selected EU Suprnova pool."
             POOL="stratum+tcp:\/\/rtm.suprnova.cc:6273"
           ;;
-          7)
+          8)
             echo -e "Selected West Coast US Suprnova pool."
             POOL="stratum+tcp:\/\/stratum.us-la1.suprnova.cc:6273"
           ;;
-          8)
+          9)
             echo -e "Selected East Coast US Suprnova pool."
             POOL="stratum+tcp:\/\/stratum.us-ny1.suprnova.cc:6273"
           ;;
-          9)
+          10)
             echo -e "Selected Asia Suprnova pool."
             POOL="stratum+tcp:\/\/stratum.apac-hkg1.suprnova.cc:6273"
           ;;
@@ -462,47 +467,52 @@ Would you like to install the miner anyway?" 11 67; then
         BACKUP_POOL_CHOICE=$(whiptail --menu "Select BACKUP pool to use" 14 55 6 \
           "1" "stratum+tcp://eu.flockpool.com:4444" \
           "2" "stratum+tcp://us.flockpool.com:4444" \
-          "3" "stratum+tcp://asia.flockpool.com:4444" \
-          "4" "stratum+tcp://r-pool.net:3008" \
-          "5" "stratum+tcp://r-pool.net:3032" \
-          "6" "stratum+tcp://rtm.suprnova.cc:6273" \
-          "7" "stratum+tcp://stratum.us-la1.suprnova.cc:6273" \
-          "8" "stratum+tcp://stratum.us-ny1.suprnova.cc:6273" \
-          "9" "stratum+tcp://stratum.apac-hkg1.suprnova.cc:6273" 3>&1 1>&2 2>&3)
+          "3" "stratum+tcp://us-west.flockpool.com:4444" \
+          "4" "stratum+tcp://asia.flockpool.com:4444" \
+          "5" "stratum+tcp://r-pool.net:3008" \
+          "6" "stratum+tcp://r-pool.net:3032" \
+          "7" "stratum+tcp://rtm.suprnova.cc:6273" \
+          "8" "stratum+tcp://stratum.us-la1.suprnova.cc:6273" \
+          "9" "stratum+tcp://stratum.us-ny1.suprnova.cc:6273" \
+          "10" "stratum+tcp://stratum.apac-hkg1.suprnova.cc:6273" 3>&1 1>&2 2>&3)
         case $BACKUP_POOL_CHOICE in
           1)
             echo -e "Selected EU Flockpool"
             BACKUP_POOL="stratum+tcp:\/\/eu.flockpool.com:4444"
           ;;
           2)
-            echo -e "Selected US Flockpool"
+            echo -e "Selected US Central Flockpool"
             BACKUP_POOL="stratum+tcp:\/\/us.flockpool.com:4444"
           ;;
           3)
+            echo -e "Selected US West Flockpool"
+            BACKUP_POOL="stratum+tcp:\/\/us-west.flockpool.com:4444"
+          ;;
+          4)
             echo -e "Selected ASIA Flockpool"
             BACKUP_POOL="stratum+tcp:\/\/asia.flockpool.com:4444"
           ;;
-          4)
+          5)
             echo -e "Selected r-pool for miners with <1kh/s."
             BACKUP_POOL="stratum+tcp:\/\/r-pool.net:3008"
           ;;
-          5)
+          6)
             echo -e "Selected r-pool for miners with >1kh/s."
             BACKUP_POOL="stratum+tcp:\/\/r-pool.net:3032"
           ;;
-          6)
+          7)
             echo -e "Selected EU Suprnova pool."
             BACKUP_POOL="stratum+tcp:\/\/rtm.suprnova.cc:6273"
           ;;
-          7)
+          8)
             echo -e "Selected West Coast US Suprnova pool."
             BACKUP_POOL="stratum+tcp:\/\/stratum.us-la1.suprnova.cc:6273"
           ;;
-          8)
+          9)
             echo -e "Selected East Coast US Suprnova pool."
             BACKUP_POOL="stratum+tcp:\/\/stratum.us-ny1.suprnova.cc:6273"
           ;;
-          9)
+          10)
             echo -e "Selected Asia Suprnova pool."
             BACKUP_POOL="stratum+tcp:\/\/stratum.apac-hkg1.suprnova.cc:6273"
           ;;
