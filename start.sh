@@ -30,6 +30,8 @@ rpcallowip=127.0.0.1
 rpcbind=127.0.0.1
 server=1
 listen=1
+par=2
+dbcache=1024
 addnode=explorer.raptoreum.com
 addnode=raptor.mopsus.com
 EOF
